@@ -1,0 +1,126 @@
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+  <title>KCE Quiz</title>
+    <link href="project.css" rel="stylesheet">
+</head>
+<body>
+<div>
+  <h1>Basic Quiz Questions</h1>
+    <div id="quiz">
+        <h3 id="question"></h3>
+        <button id="choice0"></button>
+        <button id="choice1"></button>
+        <button id="choice2"></button>
+        <button id="choice3"></button>
+        <footer>
+            <p><span id="progress"></span><span id="score"></span></p>
+        </footer>
+        <a href="#" class="previous">&laquo; Previous</a>
+        <a href="#" class="next">Next &raquo;</a>
+    </div>
+</div>
+<script>
+function Question(text, choices, answer) {
+    this.text = text;
+    this.choices = choices; 
+    this.answer = answer;
+}
+Question.prototype.isCorrect = function(choice) {
+    return this.answer === choice; 
+};
+function Quiz(questions) {
+    this.questions = questions;
+    this.currentQuestionIndex = 0;
+    this.score = 0;
+}
+Quiz.prototype.getCurrentQuestion = function() {
+    return this.questions[this.currentQuestionIndex];
+};
+Quiz.prototype.checkAnswer = function(answer) {
+    if(this.getCurrentQuestion().isCorrect(answer)) {
+        this.score++; 
+    }
+    this.currentQuestionIndex++;
+};
+Quiz.prototype.hasEnded = function() {
+    return this.currentQuestionIndex >= this.questions.length;
+};
+var QuizUI = {
+    displayNext: function() {
+        if(quiz.hasEnded()) {
+            this.showResults();
+        } else {
+            this.displayQuestion();
+            this.displayChoices();
+            this.displayProgress();
+            this.displayScore();
+        }
+    },
+    displayQuestion: function() {
+        this.populateIdWithHTML('question', quiz.getCurrentQuestion().text);
+    },
+    displayChoices: function() {
+        var choices = quiz.getCurrentQuestion().choices;
+        for(var i = 0; i < choices.length; i++) {
+            var choiceId = 'choice' + i;
+            var choiceText = choices[i];
+            this.populateIdWithHTML(choiceId, choiceText);
+            this.checkAnswerHandler(choiceId, choiceText);
+        }
+    },
+    checkAnswerHandler: function(id, guess) {
+        var button = document.getElementById(id);
+        button.onclick = function() {
+            quiz.checkAnswer(guess);
+            QuizUI.displayNext();
+        }
+    },
+    displayScore: function() {
+        var scoreText = 'Score: ' + quiz.score;
+        this.populateIdWithHTML('score', scoreText);
+    },
+    displayProgress: function() {
+        var questionNumber = quiz.currentQuestionIndex + 1;
+        var totalQuestions = quiz.questions.length;
+        var progressText = 'Question ' + questionNumber + ' of ' + totalQuestions;
+        this.populateIdWithHTML('progress', progressText);
+    },
+    showResults: function() {
+        var grade = quiz.score/quiz.questions.length;
+        var results = '<h2>';
+        if(grade >= 0.8) {
+            results += 'Excellent!';
+        } else if(grade < 0.8 && grade > 0.5) {
+            results += 'Not Bad...';
+        } else {
+            results += 'Terrible!';
+        }
+        results += '</h2><h3>Your final score is: ' + quiz.score + '</h3>';
+        results += '<button id="reset">Reload</button>';
+        this.populateIdWithHTML('quiz', results);
+        this.resetQuizHandler();
+    },
+    resetQuizHandler: function() {
+        var resetBtn = document.getElementById('reset');
+        resetBtn.onclick = function() {
+            window.location.reload(false);
+        }
+    },
+    populateIdWithHTML: function(id, content) {
+        var element = document.getElementById(id);
+        element.innerHTML = content;
+    }
+};
+var questions = [
+    new Question('1, Who is the founder Java Script ?', ['Denis Ritchie', 'James Gosling', 'Bredon Eich','Bjarne Stroustrup'], 'Bredon Eich'),
+    new Question('2, Which Year the Java Script was Created ?', ['1994', '1995', '1996','1997'], '1995'),
+    new Question('3, Choose the non primitive datatype?', ['number', 'Boolean', 'Object','String'], 'Object'),
+    new Question('4, What is FIFO?', ['First in Few Out', 'Few In Few out', 'First In First Out','Few In First Out'], 'First In First Out'),
+    new Question('5, Java script is a __________ language', ['Scripting', 'Programming','Object  Oriented','None of these'], 'Scripting'),
+];
+var quiz = new Quiz(questions);
+QuizUI.displayNext();True
+</script>
+</body>
+</html>
